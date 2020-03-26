@@ -36,7 +36,7 @@ fun main() {
             else {
                 val limit = req.query("limit")?.toIntOrNull() ?: DEFAULT_LIMIT
                 val parks = database.getParksByDistance(pos.coords, limit)
-                Response(OK).body(klaxon.toJsonString(parks.map(::toJsonPark)))
+                Response(OK).body(klaxon.toJsonString(parks))
             }
         }
     )
