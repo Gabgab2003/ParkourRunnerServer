@@ -10,31 +10,32 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
+import org.jetbrains.exposed.sql.Database
 import java.security.MessageDigest
 
 val klaxon = Klaxon()
 
 const val DEFAULT_LIMIT = 10
 
-private fun hashString(input: String, algorithm: String = "SHA-256"): String {
-    return MessageDigest
-        .getInstance(algorithm)
-        .digest(input.toByteArray())
-        .fold("", { str, it -> str + "%02x".format(it) })
-}
+private fun hashString(input: String): ByteArray = MessageDigest
+    .getInstance("SHA-256")
+    .digest(input.toByteArray())
+
+const val jdbc = "jdbc:mysql://root:@localhost:8889"
+const val driver = "com.mysql.cj.jdbc.Driver"
 
 fun main() {
-    val parkStore = ParkStore(object {}.javaClass.getResourceAsStream("/PARKINFOOGD.json"))
+    val database = DbConnector(Database.connect(jdbc, driver, "root", "sqlpassword"))
 
     val app: HttpHandler = routes(
         "getparks" bind POST to { req ->
             println(req.bodyString())
             val pos = klaxon.parse<GeoPosition>(req.bodyString())
-            if (pos == null) Response(BAD_REQUEST)
+            if (pos == null)
+                Response(BAD_REQUEST)
             else {
                 val limit = req.query("limit")?.toIntOrNull() ?: DEFAULT_LIMIT
-                val parks = parkStore.sortedByDistance(pos.coords).take(limit)
-                println(klaxon.toJsonString(parks))
+                val parks = database.getParks(pos.coords, limit)
                 Response(OK).body(klaxon.toJsonString(parks))
             }
         }
