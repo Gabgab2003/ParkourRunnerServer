@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") version "1.3.71"
     application
 }
 
@@ -31,10 +31,6 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
 }
-
-
-
-
 
 application {
     mainClassName = "net.downloadpizza.prserver.ServerKt"

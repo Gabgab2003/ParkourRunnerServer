@@ -21,7 +21,7 @@ private fun hashString(input: String): ByteArray = MessageDigest
     .getInstance("SHA-256")
     .digest(input.toByteArray())
 
-const val jdbc = "jdbc:mysql://root:@localhost:3306/parkourdata"
+const val jdbc = "jdbc:mysql://localhost:3306/parkourdata"
 const val driver = "com.mysql.cj.jdbc.Driver"
 
 fun main() {
