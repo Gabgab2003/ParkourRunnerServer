@@ -2,6 +2,7 @@ package net.downloadpizza.prserver
 
 import net.downloadpizza.prserver.types.Coordinates
 import net.downloadpizza.prserver.types.SimpleCoordinates
+import net.downloadpizza.prserver.types.bearingBetween
 import net.downloadpizza.prserver.types.distanceBetween
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
@@ -13,10 +14,8 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.`java-time`.timestamp
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.awt.image.DataBuffer
 import java.time.Duration
 import java.time.Instant
-import kotlin.math.log
 
 /*
 Table l_log as L {
@@ -87,9 +86,9 @@ class Park(id: EntityID<String>) : Entity<String>(id) {
 const val RECAP_LIMIT = 4
 
 class DbConnector(private val db: Database) {
-    fun getParks(coords: Coordinates, limit: Int? = null): List<Park> = transaction(db) {
-        Park.all().sortedBy {
-            distanceBetween(coords, it.coords)
+    fun getParksByDistance(coords: Coordinates, limit: Int? = null) = transaction(db) {
+        Park.all().map { toParkWithInfo(it, distanceBetween(coords, it.coords), bearingBetween(coords, it.coords)) }.sortedBy {
+            it.distance
         }.run { if(limit != null ) this.take(limit) else this }
     }
 
@@ -115,6 +114,25 @@ class DbConnector(private val db: Database) {
     fun getUser(id: String) = transaction(db) { User[id] }
     fun getPark(id: String) = transaction(db) { Park[id] }
 }
+
+data class ParkWithInfo(
+    val id: String,
+    val longitude: Double,
+    val latitude: Double,
+    val name: String,
+    val distance: Double,
+    val bearing: Double
+)
+
+fun toParkWithInfo(park: Park, distance: Double, bearing: Double) = ParkWithInfo(
+    park.id.value,
+    park.longitude,
+    park.latitude,
+    park.name,
+    distance,
+    bearing
+)
+
 
 data class JsonPark(
     val id: String,

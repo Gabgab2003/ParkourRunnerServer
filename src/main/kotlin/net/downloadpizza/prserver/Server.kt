@@ -6,13 +6,11 @@ import org.http4k.core.*
 import org.http4k.core.Method.POST
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.OK
-import org.http4k.filter.DebuggingFilters
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
 import org.jetbrains.exposed.sql.Database
-import java.lang.Exception
 import java.security.MessageDigest
 
 val klaxon = Klaxon()
@@ -37,7 +35,7 @@ fun main() {
                 Response(BAD_REQUEST)
             else {
                 val limit = req.query("limit")?.toIntOrNull() ?: DEFAULT_LIMIT
-                val parks = database.getParks(pos.coords, limit)
+                val parks = database.getParksByDistance(pos.coords, limit)
                 Response(OK).body(klaxon.toJsonString(parks.map(::toJsonPark)))
             }
         }
