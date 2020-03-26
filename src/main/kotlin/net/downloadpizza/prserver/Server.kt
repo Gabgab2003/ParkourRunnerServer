@@ -6,6 +6,7 @@ import org.http4k.core.*
 import org.http4k.core.Method.POST
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.OK
+import org.http4k.filter.DebuggingFilters
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
@@ -36,19 +37,16 @@ fun main() {
                 Response(BAD_REQUEST)
             else {
                 val limit = req.query("limit")?.toIntOrNull() ?: DEFAULT_LIMIT
-                try {
-                    val parks = database.getParks(pos.coords, limit)
-                    Response(OK).body(klaxon.toJsonString(parks))
-                } catch (e: Exception) {
-                    println(e.stackTrace)
-                    Response(OK)
-                }
-                }
+                val parks = database.getParks(pos.coords, limit)
+                Response(OK).body(klaxon.toJsonString(parks))
+            }
         }
     )
 
-    val server = app.asServer(Jetty(8000)).start()
+    val debuggedApp = DebuggingFilters.PrintRequestAndResponse().then(app)
 
+//    val server = app.asServer(Jetty(8000)).start()
+    val server = debuggedApp.asServer(Jetty(8000)).start()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
         override fun run() {
             server.stop()
