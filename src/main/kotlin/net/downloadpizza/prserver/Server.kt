@@ -43,10 +43,10 @@ fun main() {
         }
     )
 
-    val debuggedApp = DebuggingFilters.PrintRequestAndResponse().then(app)
+//    val debuggedApp = DebuggingFilters.PrintRequestAndResponse().then(app)
+//    val server = debuggedApp.asServer(Jetty(8000)).start()
 
-//    val server = app.asServer(Jetty(8000)).start()
-    val server = debuggedApp.asServer(Jetty(8000)).start()
+    val server = app.asServer(Jetty(8000)).start()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
         override fun run() {
             server.stop()
