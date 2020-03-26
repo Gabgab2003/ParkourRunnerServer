@@ -38,7 +38,7 @@ fun main() {
             else {
                 val limit = req.query("limit")?.toIntOrNull() ?: DEFAULT_LIMIT
                 val parks = database.getParks(pos.coords, limit)
-                Response(OK).body(klaxon.toJsonString(parks))
+                Response(OK).body(klaxon.toJsonString(parks.map(::toJsonPark)))
             }
         }
     )

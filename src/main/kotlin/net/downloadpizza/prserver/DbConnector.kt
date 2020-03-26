@@ -16,6 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.image.DataBuffer
 import java.time.Duration
 import java.time.Instant
+import kotlin.math.log
 
 /*
 Table l_log as L {
@@ -75,8 +76,8 @@ class User(id: EntityID<String>) : Entity<String>(id) {
 class Park(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, Park>(Parks)
 
-    private var longitude by Parks.longitude
-    private var latitude by Parks.latitude
+    var longitude by Parks.longitude
+    var latitude by Parks.latitude
 
     var name by Parks.name
 
@@ -114,3 +115,42 @@ class DbConnector(private val db: Database) {
     fun getUser(id: String) = transaction(db) { User[id] }
     fun getPark(id: String) = transaction(db) { Park[id] }
 }
+
+data class JsonPark(
+    val id: String,
+    val longitude: Double,
+    val latitude: Double,
+    val name: String
+)
+
+fun toJsonPark(park: Park) = JsonPark(
+    park.id.value,
+    park.longitude,
+    park.latitude,
+    park.name
+)
+
+
+data class JsonUser(
+    val id: String,
+    val pwhash: ByteArray,
+    val points: Long
+)
+
+fun toJsonUser(user: User) = JsonUser(
+    user.id.value,
+    user.pwhash,
+    user.points
+)
+
+data class JsonLogEntry(
+    val user: String,
+    val park: String,
+    val time: Instant
+)
+
+fun toJsonLogEntry(logEntry: LogEntry) = JsonLogEntry(
+    logEntry.user.value,
+    logEntry.park.value,
+    logEntry.time
+)
