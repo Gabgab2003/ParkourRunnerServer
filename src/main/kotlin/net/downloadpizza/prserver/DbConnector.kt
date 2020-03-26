@@ -50,8 +50,10 @@ object Users : IdTable<String>("u_users") {
 object Parks : IdTable<String>("p_parks") {
     override val id = varchar("p_id", 45).entityId()
 
-    val longitude = double("longitude")
-    val latitude = double("latitude")
+    val name = varchar("p_name", 60)
+
+    val longitude = double("p_longitude")
+    val latitude = double("p_latitude")
 }
 
 class LogEntry(id: EntityID<Int>) : IntEntity(id) {
@@ -74,6 +76,8 @@ class Park(id: EntityID<String>) : Entity<String>(id) {
 
     private var longitude by Parks.longitude
     private var latitude by Parks.latitude
+
+    var name by Parks.name
 
     val coords get() = SimpleCoordinates(this.latitude, this.longitude)
 }
