@@ -86,13 +86,10 @@ class Park(id: EntityID<String>) : Entity<String>(id) {
 const val RECAP_LIMIT = 4
 
 class DbConnector(private val db: Database) {
-    fun getParks(coords: Coordinates, limit: Int? = null): List<Park> {
-        Database.connect(jdbc, driver, "root", "sqlpassword")
-        return transaction {
-            Park.all().sortedBy {
-                distanceBetween(coords, it.coords)
-            }.run { if (limit != null) this.take(limit) else this }
-        }
+    fun getParks(coords: Coordinates, limit: Int? = null): List<Park> = transaction(db) {
+        Park.all().sortedBy {
+            distanceBetween(coords, it.coords)
+        }.run { if(limit != null ) this.take(limit) else this }
     }
 
     fun visitPark(user: User, park: Park): Boolean = transaction(db) {
