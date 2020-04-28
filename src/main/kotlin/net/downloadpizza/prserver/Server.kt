@@ -3,10 +3,11 @@ package net.downloadpizza.prserver
 import com.beust.klaxon.*
 import net.downloadpizza.prserver.types.GeoPosition
 import org.http4k.core.*
-import org.http4k.core.Method.POST
+import org.http4k.core.Method.*
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.OK
 import org.http4k.routing.bind
+import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
@@ -37,6 +38,25 @@ fun main() {
                 val limit = req.query("limit")?.toIntOrNull() ?: DEFAULT_LIMIT
                 val parks = database.getParksByDistance(pos.coords, limit)
                 Response(OK).body(klaxon.toJsonString(parks))
+            }
+        },
+        "getuser/{id}" bind GET to { req ->
+            val id = req.path("id")
+            if (id != null) {
+                val user = database.getUser(id)
+                Response(OK).body(klaxon.toJsonString(toJsonUser(user)))
+            } else {
+                Response(BAD_REQUEST).body("No user id given")
+            }
+
+        },
+        "getpark/{id}" bind GET to { req ->
+            val id = req.path("id")
+            if (id != null) {
+                val user = database.getPark(id)
+                Response(OK).body(klaxon.toJsonString(toJsonPark(user)))
+            } else {
+                Response(BAD_REQUEST).body("No park id given")
             }
         }
     )
