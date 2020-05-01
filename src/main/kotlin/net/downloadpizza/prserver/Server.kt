@@ -55,6 +55,7 @@ fun main() {
             if (id != null) {
                 val user = database.getPark(id)
                 Response(OK).body(klaxon.toJsonString(toJsonPark(user)))
+                Response(OK).body(klaxon.toJsonString(toJsonPark(user)))
             } else {
                 Response(BAD_REQUEST).body("No park id given")
             }

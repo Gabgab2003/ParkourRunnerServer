@@ -12,6 +12,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SortOrder.*
 import org.jetbrains.exposed.sql.`java-time`.timestamp
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Duration
@@ -87,32 +88,64 @@ const val RECAP_LIMIT = 4
 
 class DbConnector(private val db: Database) {
     fun getParksByDistance(coords: Coordinates, limit: Int? = null) = transaction(db) {
-        Park.all().map { toParkWithInfo(it, distanceBetween(coords, it.coords), bearingBetween(coords, it.coords)) }.sortedBy {
-            it.distance
-        }.run { if(limit != null ) this.take(limit) else this }
+        Park.all().map { toParkWithInfo(it, distanceBetween(coords, it.coords), bearingBetween(coords, it.coords)) }
+            .sortedBy {
+                it.distance
+            }.run { if (limit != null) this.take(limit) else this }
     }
 
     fun visitPark(user: User, park: Park): Boolean = transaction(db) {
-            val now = Instant.now()
-            val legal = !LogEntry
-                .find { (Log.user eq user.id) and (Log.park eq park.id) }
-                .orderBy(Pair(Log.time, SortOrder.DESC)).limit(1)
-                .any { Duration.between(it.time, now).toHours() < RECAP_LIMIT }
-            if (legal) {
-                LogEntry.new {
-                    this.user = user.id
-                    this.park = park.id
-                    this.time = now
-                }
-
-                user.points += 1
-                commit()
+        val now = Instant.now()
+        val legal = !LogEntry
+            .find { (Log.user eq user.id) and (Log.park eq park.id) }
+            .orderBy(Pair(Log.time, DESC)).limit(1)
+            .any { Duration.between(it.time, now).toHours() < RECAP_LIMIT }
+        if (legal) {
+            LogEntry.new {
+                this.user = user.id
+                this.park = park.id
+                this.time = now
             }
-            legal
+
+            user.points += 1
+            commit()
         }
+        legal
+    }
 
     fun getUser(id: String) = transaction(db) { User[id] }
     fun getPark(id: String) = transaction(db) { Park[id] }
+
+    fun getTopN(n: Int) = transaction(db) {
+        User.all().orderBy(Pair(Users.points, DESC)).limit(n)
+    }
+
+    fun getPlacement(id: String) = transaction(db) {
+        User.all().orderBy(Pair(Users.points, DESC)).indexOf(User[id])
+    }
+
+    fun createUser(id: String, pwhash: ByteArray) = transaction(db) {
+        if (User.findById(id) != null) {
+            false
+        } else {
+            User.new(id) {
+                this.pwhash = pwhash
+                this.points = 0
+            }
+            commit()
+            true
+        }
+    }
+
+    fun changePassword(id: String, pwhash: ByteArray) = transaction(db) {
+        if (User.findById(id) == null) {
+            false
+        } else {
+            User[id].pwhash = pwhash
+            commit()
+            true
+        }
+    }
 }
 
 data class ParkWithInfo(
