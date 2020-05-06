@@ -87,11 +87,6 @@ class Park(id: EntityID<String>) : Entity<String>(id) {
 const val RECAP_LIMIT = 4
 
 class DbConnector(private val db: Database) {
-    init {
-        transaction(db) {
-            SchemaUtils.create(Log, Users, Parks)
-        }
-    }
 
     fun getParksByDistance(coords: Coordinates, limit: Int? = null) = transaction(db) {
         Park.all().map { toParkWithInfo(it, distanceBetween(coords, it.coords), bearingBetween(coords, it.coords)) }
