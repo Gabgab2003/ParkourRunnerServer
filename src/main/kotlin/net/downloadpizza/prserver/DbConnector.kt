@@ -37,7 +37,7 @@ Table p_parks as P {
 }
  */
 
-object Log : IntIdTable("l_log", "l_id") {
+object Log : IntIdTable("l_logs", "l_id") {
     val user = reference("l_u_user", Users.id)
     val park = reference("l_p_park", Parks.id)
     val time = timestamp("l_timestamp")
@@ -87,6 +87,12 @@ class Park(id: EntityID<String>) : Entity<String>(id) {
 const val RECAP_LIMIT = 4
 
 class DbConnector(private val db: Database) {
+    init {
+        transaction(db) {
+            SchemaUtils.create(Log, Users, Parks)
+        }
+    }
+
     fun getParksByDistance(coords: Coordinates, limit: Int? = null) = transaction(db) {
         Park.all().map { toParkWithInfo(it, distanceBetween(coords, it.coords), bearingBetween(coords, it.coords)) }
             .sortedBy {
