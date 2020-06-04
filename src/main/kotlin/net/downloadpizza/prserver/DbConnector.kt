@@ -118,7 +118,7 @@ class DbConnector(private val db: Database) {
     fun getPark(id: String) = transaction(db) { Park[id] }
 
     fun getTopN(n: Int) = transaction(db) {
-        User.all().orderBy(Pair(Users.points, DESC)).limit(n)
+        User.all().orderBy(Pair(Users.points, DESC)).limit(n).map(::toJsonUser)
     }
 
     fun getPlacement(id: String) = transaction(db) {
@@ -185,13 +185,11 @@ fun toJsonPark(park: Park) = JsonPark(
 
 data class JsonUser(
     val id: String,
-    val pwhash: ByteArray,
     val points: Long
 )
 
 fun toJsonUser(user: User) = JsonUser(
     user.id.value,
-    user.pwhash,
     user.points
 )
 

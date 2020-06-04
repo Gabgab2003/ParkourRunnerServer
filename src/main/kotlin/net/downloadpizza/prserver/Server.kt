@@ -55,7 +55,19 @@ fun main() {
             if (id != null) {
                 val user = database.getPark(id)
                 Response(OK).body(klaxon.toJsonString(toJsonPark(user)))
-                Response(OK).body(klaxon.toJsonString(toJsonPark(user)))
+            } else {
+                Response(BAD_REQUEST).body("No park id given")
+            }
+        },
+        "gettop/{n}" bind GET to { req ->
+            val n = req.path("n")?.toInt() ?: 10
+            Response(OK).body(klaxon.toJsonString(database.getTopN(n)))
+        },
+        "getplacement/{id}" bind GET to { req ->
+            val id = req.path("id")
+            if (id != null) {
+                val placement = database.getPlacement(id)
+                Response(OK).body(placement.toString())
             } else {
                 Response(BAD_REQUEST).body("No park id given")
             }
