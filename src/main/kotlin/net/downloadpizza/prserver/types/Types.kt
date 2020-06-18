@@ -33,25 +33,17 @@ data class GeoPosition(
 private fun Double.toRadians() = PI * (this / 180)
 private infix fun Double.delta(other: Double) = abs(this - other)
 
-private fun Coordinates.radians(): Pair<Double, Double> = Pair(this.latitude.toRadians(), this.longitude.toRadians())
+const val earthRadiusM: Double = 63781*1e6
 
-fun distanceBetween(cord1: Coordinates, cord2: Coordinates): Double {
-    val lon1 = cord1.longitude.toRadians()
-    val lat1 = cord1.latitude.toRadians()
+fun distanceBetween(from: Coordinates, to: Coordinates): Double {
+    val dLat = Math.toRadians(to.latitude - from.latitude)
+    val dLon = Math.toRadians(to.longitude - from.longitude)
+    val originLat = Math.toRadians(from.latitude)
+    val destinationLat = Math.toRadians(to.latitude)
 
-    val lon2 = cord2.longitude.toRadians()
-    val lat2 = cord2.latitude.toRadians()
-
-
-    val r = 6371e3; // metres
-    val deltaLat = lat2 delta lat1
-    val deltaLon = lon2 delta lon1
-
-    val a = sin(deltaLat / 2).pow(2) +
-            cos(lat1) * cos(lat2) * sin(deltaLon / 2).pow(2)
-    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    return r * c;
+    val a = sin(dLat / 2).pow(2.toDouble()) + sin(dLon / 2).pow(2.toDouble()) * cos(originLat) * cos(destinationLat)
+    val c = 2 * asin(sqrt(a))
+    return earthRadiusM * c
 }
 
 fun bearingBetween(cord1: Coordinates, cord2: Coordinates): Double {
