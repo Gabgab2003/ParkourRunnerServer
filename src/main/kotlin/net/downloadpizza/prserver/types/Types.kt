@@ -33,7 +33,7 @@ data class GeoPosition(
 private fun Double.toRadians() = PI * (this / 180)
 private infix fun Double.delta(other: Double) = abs(this - other)
 
-const val earthRadiusM: Double = 63781*1e6
+const val earthRadiusM = 6.3781e6
 
 fun distanceBetween(from: Coordinates, to: Coordinates): Double {
     val dLat = Math.toRadians(to.latitude - from.latitude)
