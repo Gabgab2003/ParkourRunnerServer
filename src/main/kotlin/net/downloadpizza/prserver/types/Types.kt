@@ -36,8 +36,8 @@ private infix fun Double.delta(other: Double) = abs(this - other)
 private fun Coordinates.radians(): Pair<Double, Double> = Pair(this.latitude.toRadians(), this.longitude.toRadians())
 
 fun distanceBetween(cord1: Coordinates, cord2: Coordinates): Double {
-    val (lat1deg, lon1deg) = cord1
-    val (lat2deg, lon2deg) = cord2
+    val (lon1deg, lat1deg) = cord1
+    val (lon2deg, lat2deg) = cord2
 
     val r = 6371e3; // metres
     val lat1 = lat1deg.toRadians()
