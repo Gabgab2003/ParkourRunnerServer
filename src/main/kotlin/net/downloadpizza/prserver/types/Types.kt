@@ -44,8 +44,8 @@ fun distanceBetween(cord1: Coordinates, cord2: Coordinates): Double {
 
 
     val r = 6371e3; // metres
-    val deltaLat = lat2 - lat1
-    val deltaLon = lon2 - lon1
+    val deltaLat = lat2 delta lat1
+    val deltaLon = lon2 delta lon1
 
     val a = sin(deltaLat / 2).pow(2) +
             cos(lat1) * cos(lat2) * sin(deltaLon / 2).pow(2)
@@ -55,18 +55,21 @@ fun distanceBetween(cord1: Coordinates, cord2: Coordinates): Double {
 }
 
 fun bearingBetween(cord1: Coordinates, cord2: Coordinates): Double {
-    val (latA, lonA) = cord1.radians()
-    val (latB, lonB) = cord2.radians()
+    val lon1 = cord1.longitude.toRadians()
+    val lat1 = cord1.latitude.toRadians()
+
+    val lon2 = cord2.longitude.toRadians()
+    val lat2 = cord2.latitude.toRadians()
 
     // L = long | θ = lat
 
-    val deltaLong = lonA delta lonB
+    val deltaLong = lon1 delta lon2
 
     // X = cos θb * sin ∆L
-    val x = cos(latB) * sin(deltaLong)
+    val x = cos(lat2) * sin(deltaLong)
 
     // Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
-    val y = cos(latA) * sin(latB) - sin(latA) * cos(latB) * cos(deltaLong)
+    val y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLong)
 
     // β = atan2(X,Y)
     return atan2(x, y)
